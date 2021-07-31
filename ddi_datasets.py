@@ -23,28 +23,28 @@ def total_num_rel(name):
 def split_train_valid(data, fold, val_ratio=0.2):
         cv_split = StratifiedShuffleSplit(n_splits=2, test_size=val_ratio, random_state=fold)
 
-        pos_triples, neg_samples = data
-        train_index, val_index = next(iter(cv_split.split(X=pos_triples, y=pos_triples[:, 2])))
-        train_pos_triples = pos_triples[train_index]
-        val_pos_triples = pos_triples[val_index]
+        pos_triplets, neg_samples = data
+        train_index, val_index = next(iter(cv_split.split(X=pos_triplets, y=pos_triplets[:, 2])))
+        train_pos_triplets = pos_triplets[train_index]
+        val_pos_triplets = pos_triplets[val_index]
         train_neg_samples = neg_samples[train_index]
         test_neg_samples = neg_samples[val_index]
 
-        train_tup = (train_pos_triples, train_neg_samples)
-        val_tup = (val_pos_triples, test_neg_samples)
+        train_tup = (train_pos_triplets, train_neg_samples)
+        val_tup = (val_pos_triplets, test_neg_samples)
 
         return train_tup, val_tup
 
 def load_ddi_data_fold(name, fold, batch_size, data_size_ratio, valid_ratio=0.2):
 
     def load_split(split_name):
-        filename = (f'data/preprocessed/{dataset_name}/pair_pos_neg_triples_{split_name}.csv')
+        filename = (f'data/preprocessed/{dataset_name}/pair_pos_neg_triplets_{split_name}.csv')
         print(f'\nLoading {filename}...')
         df = pd.read_csv(filename)
-        pos_triples = [(d1, d2, r) for d1, d2, r in zip(df['Drug1_ID'], df['Drug2_ID'], df['Y'])]
+        pos_triplets = [(d1, d2, r) for d1, d2, r in zip(df['Drug1_ID'], df['Drug2_ID'], df['Y'])]
         neg_samples = [[str(e) for e in neg_s.split('_')] for neg_s in df['Neg samples']]
 
-        return np.array(pos_triples), np.array(neg_samples)
+        return np.array(pos_triplets), np.array(neg_samples)
 
     global NUM_FEATURES
     global NUM_EDGE_FEATURES
@@ -96,13 +96,13 @@ def load_ddi_data_fold(name, fold, batch_size, data_size_ratio, valid_ratio=0.2)
 def load_ddi_data_fold_cold_start(name, fold, batch_size=1024, data_size_ratio=1.0, valid_ratio=0.2):
 
     def load_split(split_name):
-        filename = (f'/preprocessed/cold_start/{dataset_name}/pair_pos_neg_triples-{split_name}.csv')
+        filename = (f'/preprocessed/cold_start/{dataset_name}/pair_pos_neg_triplets-{split_name}.csv')
         print(f'\nCold-start Loading {filename}...')
         df = pd.read_csv(filename)
-        pos_triples = [(d1, d2, r) for d1, d2, r in zip(df['Drug1_ID'], df['Drug2_ID'], df['Y'])]
+        pos_triplets = [(d1, d2, r) for d1, d2, r in zip(df['Drug1_ID'], df['Drug2_ID'], df['Y'])]
         neg_samples = [[str(e) for e in neg_s.split('_')] for neg_s in df['Neg samples']]
 
-        return np.array(pos_triples), np.array(neg_samples)
+        return np.array(pos_triplets), np.array(neg_samples)
 
     global NUM_FEATURES
     global NUM_EDGE_FEATURES
@@ -155,7 +155,7 @@ def load_ddi_data_fold_cold_start(name, fold, batch_size=1024, data_size_ratio=1
 class DrugDataset(Dataset):
 
     def __init__(self, pos_neg_tuples, all_drug_data, ratio=1.0, seed=0):
-        self.pair_triples = []
+        self.pair_triplets = []
         self.ratio = ratio
         self.drug_ids = list(all_drug_data.keys())
         self.all_drug_data = all_drug_data
@@ -163,12 +163,12 @@ class DrugDataset(Dataset):
 
         for pos_item, neg_list in zip(*pos_neg_tuples):
             if ((pos_item[0] in self.drug_ids) and (pos_item[1] in self.drug_ids)):
-                self.pair_triples.append((pos_item, neg_list))
+                self.pair_triplets.append((pos_item, neg_list))
         
         if ratio != 1.0:
-            self.rng.shuffle(self.pair_triples)
-            limit = math.ceil(len(self.pair_triples) * ratio)
-            self.pair_triples = self.pair_triples[:limit]
+            self.rng.shuffle(self.pair_triplets)
+            limit = math.ceil(len(self.pair_triplets) * ratio)
+            self.pair_triplets = self.pair_triplets[:limit]
     
     def collate_fn(self, batch):
         old_id_to_new_batch_id = {}
@@ -244,10 +244,10 @@ class DrugDataset(Dataset):
 
 
     def __len__(self):
-        return len(self.pair_triples)
+        return len(self.pair_triplets)
 
     def __getitem__(self, index):
-        return self.pair_triples[index]
+        return self.pair_triplets[index]
 class TwosidesDataset(DrugDataset):
 
     def collate_fn(self, batch):

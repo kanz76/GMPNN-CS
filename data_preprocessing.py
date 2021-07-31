@@ -107,8 +107,8 @@ def load_drug_mol_data(args):
     return drug_data
 
 
-def generate_pair_triples(args):
-    pos_triples = []
+def generate_pair_triplets(args):
+    pos_triplets = []
     drug_ids = []
 
     with open(f'{args.dirname}/{args.dataset.lower()}/drug_data.pkl', 'rb') as f:
@@ -120,17 +120,17 @@ def generate_pair_triples(args):
         # Drugbank dataset is 1-based index, need to substract by 1
         if args.dataset in ('drugbank', ):
             relation -= 1
-        pos_triples.append([id1, id2, relation])
+        pos_triplets.append([id1, id2, relation])
 
-    if len(pos_triples) == 0:
+    if len(pos_triplets) == 0:
         raise ValueError('All tuples are invalid.')
 
-    pos_triples = np.array(pos_triples)
-    data_statistics = load_data_statistics(pos_triples)
+    pos_triplets = np.array(pos_triplets)
+    data_statistics = load_data_statistics(pos_triplets)
     drug_ids = np.array(drug_ids)
 
     neg_samples = []
-    for pos_item in tqdm(pos_triples, desc='Generating Negative sample'):
+    for pos_item in tqdm(pos_triplets, desc='Generating Negative sample'):
         temp_neg = []
         h, t, r = pos_item[:3]
 
@@ -146,11 +146,11 @@ def generate_pair_triples(args):
         
         neg_samples.append('_'.join(map(str, temp_neg[:args.neg_ent])))
     
-    df = pd.DataFrame({'Drug1_ID': pos_triples[:, 0], 
-                        'Drug2_ID': pos_triples[:, 1], 
-                        'Y': pos_triples[:, 2],
+    df = pd.DataFrame({'Drug1_ID': pos_triplets[:, 0], 
+                        'Drug2_ID': pos_triplets[:, 1], 
+                        'Y': pos_triplets[:, 2],
                         'Neg samples': neg_samples})
-    filename = f'{args.dirname}/{args.dataset}/pair_pos_neg_triples.csv'
+    filename = f'{args.dirname}/{args.dataset}/pair_pos_neg_triplets.csv'
     df.to_csv(filename, index=False)
     print(f'\nData saved as {filename}!')
     save_data(data_statistics, 'data_statistics.pkl', args)
@@ -230,7 +230,7 @@ def save_data(data, filename, args):
 
 
 def split_data(args):
-    filename = f'{args.dirname}/{args.dataset}/pair_pos_neg_triples.csv'
+    filename = f'{args.dirname}/{args.dataset}/pair_pos_neg_triplets.csv'
     df = pd.read_csv(filename)
     seed = args.seed
     class_name = args.class_name 
@@ -253,10 +253,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-d', '--dataset', type=str, required=True, choices=['drugbank', 'twosides'], 
-                            help='Dataset to preproces.')
+                            help='Dataset to preprocess.')
     parser.add_argument('-n', '--neg_ent', type=int, default=1, help='Number of negative samples')
     parser.add_argument('-s', '--seed', type=int, default=0, help='Seed for the random number generator')
-    parser.add_argument('-o', '--operation', type=str, required=True, choices=['all', 'generate_triples', 'drug_data', 'split'], help='Operation to perform')
+    parser.add_argument('-o', '--operation', type=str, required=True, choices=['all', 'generate_triplets', 'drug_data', 'split'], help='Operation to perform')
     parser.add_argument('-t_r', '--test_ratio', type=float, default=0.2)
     parser.add_argument('-n_f', '--n_folds', type=int, default=3)
 
@@ -280,8 +280,8 @@ if __name__ == '__main__':
     if args.operation in ('all', 'drug_data'):
         load_drug_mol_data(args)
 
-    if args.operation in ('all','generate_triples'):
-        generate_pair_triples(args)
+    if args.operation in ('all','generate_triplets'):
+        generate_pair_triplets(args)
     
     if args.operation in ('all', 'split'):
         args.class_name = 'Y'
