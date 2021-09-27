@@ -1,5 +1,5 @@
 # GMPNN-CS
-Source code for ["This paper"]( https://website) 
+Source code for ["Drug-drug Interaction Prediction with Learnable Size-Adaptive Molecular Substructures"]() 
    
 ![Overview GMPNN-CS framework](Framework.png)  
 
@@ -16,9 +16,7 @@ Datasets can be downloaded using the python library [Therapeutics Data Commons](
 ### Data Preprocessing
 Molecular graph representation and negative samples generation. All saved in [data/preprocessed](data/preprocessed).   
 
-    python data_preprocessing.py -d {drugbank,twosides} [-n NEG_ENT] [-s SEED]
-                                 -o {all,generate_triplets,drug_data,split}
-                                 [-t_r TEST_RATIO] [-n_f N_FOLDS]
+    python data_preprocessing.py -d {drugbank,twosides} [-n NEG_ENT] [-s SEED] -o {all,generate_triplets,drug_data,split} [-t_r TEST_RATIO] [-n_f N_FOLDS]
 
 Arguments:
 
@@ -33,8 +31,7 @@ Arguments:
     -t_r test set ratio [0-1]. Default=0.2
     -n_f number of folds. Default=3
 ## Training 
-    python train_on_fold.py -d {drugbank, twosides} -fold FOLD -n_iter N_ITER
-                            [-drop DROPOUT] [-b BATCH_SIZE]
+    python train_on_fold.py -d {drugbank, twosides} -fold FOLD -n_iter N_ITER [-drop DROPOUT] [-b BATCH_SIZE]
 
 Arguments:
 
