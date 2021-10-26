@@ -1,5 +1,5 @@
 # GMPNN-CS
-Source code for ["Drug-drug Interaction Prediction with Learnable Size-Adaptive Molecular Substructures"]() 
+Source code for ["Drug-drug Interaction Prediction with Learnable Size-Adaptive Molecular Substructures"](https://doi.org/10.1093/bib/bbab441) 
    
 ![Overview GMPNN-CS framework](Framework.png)  
 
