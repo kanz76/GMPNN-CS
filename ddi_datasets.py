@@ -328,15 +328,23 @@ class PairData(Data):
         self.num_nodes = None
 
     def __inc__(self, key, value):
+    # In case of "TypeError: __inc__() takes 3 positional arguments but 4 were given"
+    # Replace with "def __inc__(self, key, value, *args, **kwargs)"
         if key == 'edge_index':
             return torch.tensor([[self.j_indices.shape[0]], [self.i_indices.shape[0]]])
         if key in ('i_indices', 'j_indices'):
             return 1
         return super().__inc__(key, value)
+            # In case of "TypeError: __inc__() takes 3 positional arguments but 4 were given"
+            # Replace with "return super().__inc__(self, key, value, args, kwargs)"
 
 
 class CustomData(Data):
     def __inc__(self, key, value):
+    # In case of "TypeError: __inc__() takes 3 positional arguments but 4 were given"
+    # Replace with "def __inc__(self, key, value, *args, **kwargs)"
         if key == 'line_graph_edge_index':
             return self.edge_index.size(1) if self.edge_index.nelement()!=0 else 0
         return super().__inc__(key, value)
+        # In case of "TypeError: __inc__() takes 3 positional arguments but 4 were given"
+        # Replace with "return super().__inc__(self, key, value, args, kwargs)"
